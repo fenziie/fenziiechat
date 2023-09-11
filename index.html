@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AI Chatbot</title>
+    <style>
+      /* Chat window styles */
+      #chat-window {
+        width: 400px;
+        height: 500px;
+        background-color: #f7f7f7;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Chat area styles */
+      #chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: scroll;
+      }
+
+      /* Chat bubble styles */
+      .message {
+        display: inline-block;
+        max-width: 80%;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 15px;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      /* User message styles */
+      .user-message {
+        background-color: #ebf8ff;
+      }
+
+      /* Bot message styles */
+      .bot-message {
+        background-color: #f0f4f8;
+      }
+
+      /* Input area styles */
+      .input-area {
+        padding: 10px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+      }
+
+      /* Input field styles */
+      #user-input {
+        flex-grow: 1;
+        padding: 8px;
+        border: none;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 14px;
+      }
+
+      /* Send button styles */
+      #send-button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4a9cdb;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      #send-button:hover {
+        background-color: #1c7ed6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-window">
+      <div id="chat-messages"></div>
+      <div class="input-area">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Type your message here"
+        />
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+
+    <script>
+      const chatMessages = document.getElementById("chat-messages");
+      const userInput = document.getElementById("user-input");
+      const sendButton = document.getElementById("send-button");
+
+      // Function to display a chat message in the chat window
+      function displayMessage(message, sender) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        if (sender === "user") {
+          messageElement.classList.add("user-message");
+        } else {
+          messageElement.classList.add("bot-message");
+        }
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
+      }
+
+      // Function to send user message to the AI model
+      function sendUserMessage() {
+        const userMessage = userInput.value.trim();
+        if (userMessage !== "") {
+          displayMessage(userMessage, "user");
+          userInput.value = "";
+
+          const options = {
+            method: "POST",
+            headers: {
+              accept: "application/json",
+              "content-type": "application/json",
+              Authorization: "Bearer sdP1ohQEzfxo1RYC81tP87cMtheXCts4",
+            },
+            body: JSON.stringify({
+              numResults: 1,
+              maxTokens: 16,
+              minTokens: 0,
+              temperature: 0.7,
+              topP: 1,
+              topKReturn: 0,
+              frequencyPenalty: {
+                scale: 1,
+                applyToWhitespaces: true,
+                applyToPunctuations: true,
+                applyToNumbers: true,
+                applyToStopwords: true,
+                applyToEmojis: true,
+              },
+              presencePenalty: {
+                scale: 0,
+                applyToWhitespaces: true,
+                applyToPunctuations: true,
+                applyToNumbers: true,
+                applyToStopwords: true,
+                applyToEmojis: true,
+              },
+              countPenalty: {
+                scale: 0,
+                applyToWhitespaces: true,
+                applyToPunctuations: true,
+                applyToNumbers: true,
+                applyToStopwords: true,
+                applyToEmojis: true,
+              },
+              prompt: userMessage,
+            }),
+          };
+
+          // Send a POST request to the AI model
+          fetch("https://api.ai21.com/studio/v1/j2-ultra/complete", options)
+            .then((response) => response.json())
+            .then((data) => {
+              const botResponse = data.completions[0].data.text;
+              displayMessage(botResponse, "bot");
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+      }
+
+      // Event listener for the send button
+      sendButton.addEventListener("click", sendUserMessage);
+
+      // Event listener for the Enter key press in the input field
+      userInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          sendUserMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
